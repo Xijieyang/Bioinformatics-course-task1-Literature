@@ -134,6 +134,206 @@ Pipes help make code easy to read by showing what happens step-by-step. They use
 The apply family of functions helps to avoid writing loops, making code shorter and easier to use on things like lists and tables. They let you do the same thing to many parts of your data quickly.
 
 Task 7 - Basic visualization with R
+1a 
+# Load data
+magic_guys <- read.csv("C: /Users/Xijyan/OneDrive - Karolinska Institutet/Documents/Phd courses/Bioinformatics Analysis and Visualisation of/task7/magic_guys.csv")
+
+# Split data by species (using the correct column name "length")
+speciesjedi <- magic_guys$length[magic_guys$species == "jedi"]
+speciessith<- magic_guys$length[magic_guys$species == "sith"]
+
+# Base R histograms
+par(mfrow = c(1, 2))  # Side-by-side plots
+hist(speciesjedi, breaks = 10, col = "skyblue", main = "Species jedi Length", xlab = "Length")
+hist(speciessith, breaks = 10, col = "salmon", main = "Species sith Length", xlab = "Length")
+
+ggplot2:
+# Base R histograms with different breaks
+par(mfrow = c(1, 2))  # Side-by-side plots
+hist(speciesA, breaks = 10, col = "skyblue", main = "Species A Length", xlab = "length")
+hist(speciesB, breaks = 10, col = "salmon", main = "Species B Length ", xlab = " length ")
+library(ggplot2)
+
+# Overlaid histograms
+ggplot(magic_guys, aes(x = length, fill = species)) +
+  geom_histogram(position = "identity", alpha = 0.6, bins = 20) +
+  labs(title = "Length Distribution by Species", x = "Length", y = "Count") +
+  theme_minimal()
+
+# Faceted histograms
+ggplot(magic_guys, aes(x = length)) +
+  geom_histogram(fill = "blue", bins = 15) +
+  facet_wrap(~species, ncol = 1) +
+  labs(title = "Length Distribution by Species") +
+  theme_bw()
+
+1b. Boxplots with Base R and ggplot2
+Base R:
+boxplot(length ~ species, data = magic_guys, 
+        col = c("skyblue", "salmon"), 
+        main = "Length by Species", 
+        xlab = "Species", ylab = " Length")
+
+ggplot2:
+ggplot(magic_guys, aes(x = species, y = length, fill = species)) +
+  geom_boxplot() +
+  labs(title = " Length Distribution by Species") +
+  scale_fill_manual(values = c("skyblue", "salmon")) +
+  theme_classic()
+
+1c. Saving Plots
+Base R Plots:
+# Save as PNG
+png("hist_base.png")
+par(mfrow = c(1, 2))
+hist(speciesjedi, breaks = 10, col = "skyblue", main = "Species jedi")
+hist(speciessith, breaks = 10, col = "salmon", main = "Species sith")
+dev.off()
+
+# Save as PDF
+pdf("boxplot_base.pdf")
+boxplot(length ~ species, data = magic_guys)
+dev.off()
+
+ggplot2 Plots:
+# Save histograms
+ggsave("hist_ggplot.png", plot = last_plot(), device = "png", dpi = 300)
+ggsave("hist_ggplot.pdf", device = "pdf")
+ggsave("hist_ggplot.svg", device = "svg")
+
+# Save boxplots
+ggplot_box <- ggplot(magic_guys, aes(x = species, y = length)) + geom_boxplot()
+ggsave("boxplot_ggplot.svg", plot = ggplot_box, device = "svg")
+
+2a
+# Load the data without enforcing row names first
+data <- read.table("C:/Users/Xijyan/OneDrive - Karolinska Institutet/Documents/Phd courses/Bioinformatics Analysis and Visualisation of/task7/ microarray_data.tab ", sep = "\t", header = TRUE)
+
+# Check for duplicate gene IDs in the first column
+duplicate_genes <- sum(duplicated(data[, 1]))
+cat("Number of duplicate gene IDs:", duplicate_genes, "\n")
+
+# If duplicates exist, make row names unique
+rownames(data) <- make.unique(as.character(data[, 1]))
+data <- data[, -1]  # Remove the original first column
+
+# Get dimensions
+rows <- nrow(data)
+cols <- ncol(data)
+cat("a. The matrix has", rows, "rows (genes) and", cols, "columns (samples).\n")
+
+The matrix has 553 rows (genes) and 998 columns (samples).
+
+2b
+# Open a PNG graphics device
+png("missing_values_histogram.png", width = 800, height = 600, res = 100)
+
+# Generate the histogram
+hist(rowSums(is.na(data)), 
+     main = "Missing Values per Gene",
+     xlab = "Number of Missing Values",
+     col = "skyblue",
+     breaks = 20)  # Adjust breaks for granularity
+
+# Close the graphics device to save the file
+dev.off()
+
+2c
+Genes with over 10% missing: 346
+Genes with over 20% missing: 236
+Genes with over 50% missing: 8
+
+2d
+Missing values after imputation: 1996
+
+3
+library(ggplot2)
+# 1. Create the plot and assign it to variable 'p'
+p <- ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() +
+  labs(title = "CO2 Uptake by Plant Type and Treatment",
+       x = "Plant Type", y = "CO2 Uptake (μmol/m²/sec)")
+# 2. Now save using the 'p' object
+ggsave("CO2_Boxplot_Type_Treatment.pdf", plot = p, device = "pdf", width = 10, height = 6)
+ggsave("CO2_Boxplot_Type_Treatment.png", plot = p, device = "png", width = 10, height = 6, dpi = 300)
+ggsave("CO2_Boxplot_Type_Treatment.svg", plot = p, device = "svg", width = 10, height = 6)
+
+Observations:
+•	Quebec plants (cooler climate) have higher median uptake than Mississippi plants (warmer climate).
+•	Chilling treatment reduces uptake, especially in Mississippi plants.
+•	Interaction between Type and Treatment: Chilling has a stronger negative effect on Mississippi plants.
+
+
+library(ggplot2)
+ggplot(CO2, aes(x = conc, y = uptake, color = Treatment)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "loess", se = FALSE) +  # Add trend lines
+  facet_wrap(~ Type) +
+  labs(title = "CO2 Uptake vs. Concentration by Plant Type",
+       x = "CO2 Concentration (mL/L)", y = "CO2 Uptake (μmol/m²/sec)")
+library(ggplot2)
+
+# 1. Create the plot and assign it to a variable
+scatter_plot <- ggplot(CO2, aes(x = conc, y = uptake, color = Treatment)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "loess", se = FALSE) +  # LOESS trend lines
+  facet_wrap(~ Type) +
+  labs(title = "CO2 Uptake vs. Concentration by Plant Type",
+       x = "CO2 Concentration (mL/L)", y = "CO2 Uptake (μmol/m²/sec)")
+
+# 2. Save in multiple formats
+ggsave("CO2_Scatter_Concentration.pdf", plot = scatter_plot, device = "pdf", width = 12, height = 8)
+ggsave("CO2_Scatter_Concentration.png", plot = scatter_plot, device = "png", width = 12, height = 8, dpi = 300)
+ggsave("CO2_Scatter_Concentration.svg", plot = scatter_plot, device = "svg", width = 12, height = 8)
+
+Observations:
+•	Uptake increases with CO₂ concentration but plateaus at higher concentrations.
+•	Non-chilled plants (especially Quebec) show steeper initial increases in uptake.
+•	Mississippi chilled plants have the lowest uptake at all concentrations.
+
+
+Task 8
 1a
-![Description](image.png)
+> chromosome_summary
+# A tibble: 7 × 6
+  variable       mean  median      max codinggenes   rna
+  <chr>         <dbl>   <dbl>    <dbl>       <dbl> <dbl>
+1 variations 6484572. 6172346 12945965         NA   NA  
+2 protein         NA       NA       NA        850.  NA  
+3 protein         NA       NA       NA        836   NA  
+4 protein         NA       NA       NA       2058   NA  
+5 mi              NA       NA       NA         NA   73.2
+6 mi              NA       NA       NA         NA   75  
+7 mi              NA       NA       NA         NA  134  
+
+1b
+library(ggplot2)
+
+# Plot the distribution of chromosome sizes (basepairs)
+ggplot(chromosome, aes(x = basepairs)) +
+  geom_histogram(
+    aes(y = after_stat(density)),  # Normalize histogram to density
+    bins = 30,                     # Adjust bin count
+    fill = "skyblue",
+    color = "black"
+  ) +
+  geom_density(color = "red", linewidth = 1) +  # Overlay density curve
+  scale_x_log10(labels = scales::comma) +       # Log-scale for skewed data
+  labs(
+    title = "Distribution of Chromosome Sizes",
+    x = "Basepairs (log10 scale)",
+    y = "Density"
+  )
+
+ggplot(chromosome, aes(y = basepairs)) +
+  geom_boxplot(fill = "lightgreen", color = "darkgreen") +
+  scale_y_log10(labels = scales::comma) +  # Log-scale for outliers
+  labs(
+    title = "Chromosome Size Distribution",
+    y = "Basepairs (log10 scale)"
+  )
+
+
+
+
 
