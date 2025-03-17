@@ -134,4 +134,5 @@ Pipes help make code easy to read by showing what happens step-by-step. They use
 The apply family of functions helps to avoid writing loops, making code shorter and easier to use on things like lists and tables. They let you do the same thing to many parts of your data quickly.
 
 Task 7 - Basic visualization with R
+1a
 
