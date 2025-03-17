@@ -353,5 +353,64 @@ protein_coding_vs_length.png
 mirna_vs_length.png
 
 1d
+library(tidyverse)
+library(tidybiology)
+
+data("proteins")
+
+# Calculate mean, median, and max for length and mass
+protein_summary <- proteins %>%
+  summarize(
+    across(
+      c(length, mass),  # Use actual column names if different
+      list(
+        mean = ~mean(., na.rm = TRUE),
+        median = ~median(., na.rm = TRUE),
+        max = ~max(., na.rm = TRUE)
+      )
+  ) %>%
+  pivot_longer(
+    everything(),
+    names_to = c("variable", ".value"),
+    names_sep = "_"
+  )
+
+print(protein_summary)
+
+# Create a scatter plot with customization
+custom_plot <- ggplot(proteins, aes(x = length, y = mass)) +
+  geom_point(
+    aes(color = mass),          # Color points by mass
+    size = 3,                   # Adjust point size
+    alpha = 0.7,                # Transparency
+    shape = 19                  # Solid circle shape
+  ) +
+  geom_smooth(
+    method = "lm",              # Linear regression line
+    color = "darkred", 
+    se = TRUE,                  # Show confidence interval
+    linewidth = 1.2
+  ) +
+  scale_color_viridis_c(option = "plasma") +  # Color gradient
+  scale_x_log10(labels = scales::comma) +     # Log scale for skewed data
+  scale_y_log10(labels = scales::comma) +
+  labs(
+    title = "Protein Length vs. Molecular Mass",
+    subtitle = "Logarithmic Scale Relationship",
+    x = "Length (log10 Å)",
+    y = "Mass (log10 kDa)",
+    color = "Mass (kDa)"
+  ) +
+  theme_minimal() +             # Clean theme
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(color = "navy"),
+    legend.position = "bottom"
+  )
+
+print(custom_plot)
+
+ggsave("protein_length_vs_mass.pdf")   # Vector format (editable in Illustrator)
+ggsave("protein_length_vs_mass.jpg")   # JPEG (smaller file size)
 
 
