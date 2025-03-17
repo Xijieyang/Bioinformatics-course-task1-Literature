@@ -334,6 +334,24 @@ ggplot(chromosome, aes(y = basepairs)) +
   )
 
 
+1c
+# Plot for protein coding genes
+plot_protein <- ggplot(chromosome, aes(x = basepairs, y = protein_codinggenes)) +
+  geom_point(color = "darkblue", alpha = 0.7) +                # Scatter points
+  geom_smooth(method = "lm", color = "red", se = FALSE) +      # Linear trend line
+  scale_x_log10(labels = scales::comma) +                      # Log-scale for basepairs
+  labs(
+    title = "Protein Coding Genes vs. Chromosome Length",
+    x = "Chromosome Length (log10 basepairs)",
+    y = "Protein Coding Genes"
+  ) +
+  theme_minimal()
 
+print(plot_protein)
+
+protein_coding_vs_length.png
+mirna_vs_length.png
+
+1d
 
 
